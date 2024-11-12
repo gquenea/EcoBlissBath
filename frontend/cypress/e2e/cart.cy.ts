@@ -26,7 +26,7 @@ describe('Cart', () => {
       .then((stockText) => {
         const matches = stockText.match(/-?\d+/);
         if (matches && matches[0]) {
-          const stock = parseInt(matches[0], 10); // Extraction du nombre uniquement
+          const stock = parseInt(matches[0], 10); // Extract the number
           if (stock <= 0) {
             cy.getByDataCy('detail-product-add').should('be.disabled');
           } else {
@@ -179,8 +179,6 @@ describe('Cart', () => {
         if (matches && matches[0]) {
           finalProductStock = parseInt(matches[0], 10);
         }
-        console.log(finalProductStock);
-
         expect(finalProductStock).to.equal(
           initialProductStock - productQuantity
         );

@@ -14,4 +14,19 @@ describe('Connexion', () => {
     });
     cy.getByDataCy('nav-link-cart').should('be.visible');
   });
+
+  it('Form did not contain XSS vulnerability', () => {
+    cy.visit('http://localhost:8080/#/login');
+    cy.getByDataCy('login-input-username').type(
+      '<script>alert("XSS");</script>'
+    );
+    cy.getByDataCy('login-input-password').type(
+      '<script>alert("XSS");</script>'
+    );
+    cy.getByDataCy('login-submit').click();
+
+    cy.on('window:alert', () => {
+      throw new Error('Faille XSS !');
+    });
+  });
 });
