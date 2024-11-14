@@ -84,25 +84,6 @@ describe('Api - User Logged In', () => {
     });
   });
 
-  // En attente de retour de Pascal
-
-  // it('Should return an error when trying to add a product that is out of stock', () => {
-  //   cy.request({
-  //     method: 'PUT',
-  //     url: Cypress.env('apiUrl') + '/orders/add',
-  //     headers: {
-  //       Authorization: 'Bearer ' + token,
-  //     },
-  //     body: {
-  //       product: 4,
-  //       quantity: 1,
-  //     },
-  //     failOnStatusCode: false,
-  //   }).then((response) => {
-  //     expect(response.body).to.be.an('object');
-  //   });
-  // });
-
   it('Should return an error when trying to add a product that is out of stock', () => {
     cy.request({
       method: 'POST',

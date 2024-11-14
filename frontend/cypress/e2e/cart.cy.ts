@@ -185,3 +185,77 @@ describe('Cart', () => {
       });
   });
 });
+
+describe('Quantity limit verification when adding a product', () => {
+  let token = '';
+
+  // Clear the cart
+  beforeEach(() => {
+    cy.request('POST', Cypress.env('apiUrl') + '/login', {
+      username: 'test2@test.fr',
+      password: 'testtest',
+    }).then((response) => {
+      expect(response.status).to.eq(200);
+      expect(response.body).to.have.property('token');
+      token = response.body.token;
+
+      cy.request({
+        method: 'GET',
+        url: Cypress.env('apiUrl') + '/orders',
+        headers: {
+          Authorization: 'Bearer ' + token,
+        },
+      }).then((response) => {
+        expect(response.status).to.eq(200);
+        const lineIds = response.body.orderLines.map(
+          (line: { id: number }) => line.id
+        );
+        cy.log('Order line IDs in cart:', lineIds);
+
+        lineIds.forEach((id: number) => {
+          cy.request({
+            method: 'DELETE',
+            url: `${Cypress.env('apiUrl')}/orders/${id}/delete`,
+            headers: {
+              Authorization: 'Bearer ' + token,
+            },
+          }).then((deleteResponse) => {
+            expect(deleteResponse.status).to.eq(200);
+          });
+        });
+      });
+    });
+    cy.visit('http://localhost:8080/#/login');
+    cy.getByDataCy('login-input-username').type('test2@test.fr');
+    cy.getByDataCy('login-input-password').type('testtest');
+    cy.getByDataCy('login-submit').click();
+    cy.wait(1000);
+  });
+
+  it('we should not be able to add a product with a negative quantity', () => {
+    cy.visit('http://localhost:8080/#/products/8');
+    cy.wait(1000);
+    cy.getByDataCy('detail-product-quantity').clear().type('-1');
+    cy.getByDataCy('detail-product-add').click();
+  });
+
+  it('we should not be able to add a product with a quantity greater than 20', () => {
+    cy.visit('http://localhost:8080/#/products/10');
+    cy.wait(1000);
+    cy.getByDataCy('detail-product-quantity').clear().type('21');
+    cy.getByDataCy('detail-product-add').click();
+  });
+
+  afterEach(() => {
+    cy.request({
+      method: 'GET',
+      url: Cypress.env('apiUrl') + '/orders',
+      headers: {
+        Authorization: 'Bearer ' + token,
+      },
+    }).then((response) => {
+      expect(response.status).to.eq(200);
+      expect(response.body.orderLines.length).to.eq(0);
+    });
+  });
+});
