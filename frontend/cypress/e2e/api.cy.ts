@@ -84,7 +84,7 @@ describe('Api - User Logged In', () => {
     });
   });
 
-  it('Should return an error when trying to add a product that is out of stock', () => {
+  it('Add a review', () => {
     cy.request({
       method: 'POST',
       url: Cypress.env('apiUrl') + '/reviews',
@@ -99,6 +99,24 @@ describe('Api - User Logged In', () => {
     }).then((response) => {
       expect(response.status).to.eq(200);
       expect(response.body).to.be.an('object');
+    });
+  });
+
+  it('Add a review with XSS', () => {
+    cy.visit('http://localhost:8080/#/login');
+    cy.getByDataCy('login-input-username').type('test2@test.fr');
+    cy.getByDataCy('login-input-password').type('testtest');
+    cy.getByDataCy('login-submit').click();
+    cy.wait(1000);
+
+    cy.visit('http://localhost:8080/#/reviews');
+    cy.getByDataCy('review-input-title').type('<script>alert("XSS")</script>');
+    cy.getByDataCy('review-input-comment').type(
+      '<script>alert("XSS")</script>'
+    );
+    cy.getByDataCy('review-submit').click();
+    cy.on('window:alert', () => {
+      throw new Error("Une fenêtre d'alerte s'est affichée !");
     });
   });
 });
